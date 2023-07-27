@@ -5,13 +5,14 @@ import streamlit as st
 import os
 import ast
 import pandas as pd
+import matplotlib.pyplot as plt
 import openai
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import SequentialChain
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv()) # read local .env file
-openai.api_key = "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"
+openai.api_key = "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"
 openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
 
 # gpt functions
@@ -45,9 +46,14 @@ def get_skills_summary(text):
         
         # applicant data:```{text}```
         # """
-    applicants_response = get_completion(second_prompt, temperature=0)
-    return applicants_response
+    skills_summary = get_completion(second_prompt, temperature=0)
+    return skills_summary
 
+
+def get_experience_summary(text):
+    third_prompt = f"""For the applicants data in {text} please provide extract all the key skills shown by the applicants, how many applicants show each skill and the average proficiency score across all applicants of either 1 (basic), 2 (intermediate) or 3 (advanced). Please provide the answer in json format e.g. {{"skill": ["skill 1", "skill 2"], "number_of_candidates_with_skill": [1, 3], "average_proficiency_score": [3, 1]}}"""
+    experience_summary = get_completion(third_prompt, temperature=0)
+    return experience_summary
 
 def get_skills(summary):
     skills_lists = [x["skills"].split(",") for x in summary]
@@ -76,8 +82,8 @@ if st.button('Generate applicants'):
     applicants = create_applicants(input_text)
     skills_summary = get_skills_summary(applicants)
     skills_summary = pd.DataFrame(ast.literal_eval(skills_summary)).sort_values(by="number_of_candidates_with_skill", ascending=False)
+    # fig = plt.barh(skills_summary["skill"], skills_summary["number_of_candidates_with_skill"])
 
-    # Display the output text on the second screen
     st.write(applicants)
-    # skills_table = get_skills(summary)
     st.dataframe(skills_summary)
+    # st.plotly_chart(fig)
