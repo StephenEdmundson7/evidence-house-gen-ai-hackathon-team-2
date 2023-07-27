@@ -20,7 +20,4 @@
 "https://data.cma.gov.uk" + instance[0] + "proxy/" + "8080/"
 
 # %%
-# !export OPEN_AI_API_KEY=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
-
-# %%
 # !streamlit run app.py --server.port 8080

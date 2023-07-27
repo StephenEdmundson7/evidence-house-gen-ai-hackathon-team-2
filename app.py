@@ -3,22 +3,24 @@
 # imports and set up
 import streamlit as st
 import os
+import ast
+import pandas as pd
 import openai
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import SequentialChain
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv()) # read local .env file
-openai.api_key = # insert key
+openai.api_key = "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"
 openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
 
 # gpt functions
-def get_completion(prompt, model="gpt-3.5-turbo"):
+def get_completion(prompt, temperature, model="gpt-3.5-turbo"):
     messages = [{"role": "user", "content": prompt}]
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,
-        temperature=0.9,
+        temperature=temperature,
     )
     return response.choices[0].message["content"]
 
@@ -33,28 +35,22 @@ def create_applicants(text):
 
     text:```{text}```
     """
-    applicants_response = get_completion(first_prompt)
+    applicants_response = get_completion(first_prompt, temperature=0.9)
     return applicants_response
 
-def get_summary(text):
-    second_prompt= f"""write a summary of each applicant with categories:
-        skills, years of experience.  \
-        and rank the applicants and give a one short summary reasoning of the ranking.
-
-        text:```{text}```
-
-        Format the output as a python dictionary with the following keys:
-        skills
-        years of experinece
-        ranking
-        reasoning of ranking
-        """
-    applicants_response = get_completion(second_prompt)
+def get_skills_summary(text):
+    second_prompt = f"""For the applicants data in {text} please provide extract all the key skills shown by the applicants, how many applicants show each skill and the average proficiency score across all applicants of either 1 (basic), 2 (intermediate) or 3 (advanced). Please provide the answer in json format e.g. {{"skill": ["skill 1", "skill 2"], "number_of_candidates_with_skill": [1, 3], "average_proficiency_score": [3, 1]}}"""
+    # second_prompt = f"""Imagine you are a recruiter. Return a json file with the following keys for the applicant data in {text}. 1) Key skills: the relevant skills shown by the candidate with an associated proficiency score of either 1 (basic), 2 (intermediate) or 3 (advanced). Each item in the json is a different skill"""
+    # second_prompt= f"""Imagine you are a recruiter. Categorise each candidate with their relevant skills, level of education and years of experience. Rank the applicants and give a one short summary reasoning of the ranking. Format the output as a python dictionary without any line breaks with the following keys: skills (Please list the relevant skills demonstrated by each applicant and give them a proficiency level from 1 (basic), 2 (intermediate) or 3 (advanced)), years of work experience (integer of how many years an applicant has been working for), highest level of education (e.g. Bachelors degree, masters degree or PhD), ranking (reasoning of ranking).
+        
+        # applicant data:```{text}```
+        # """
+    applicants_response = get_completion(second_prompt, temperature=0)
     return applicants_response
 
 
-def get_skills(skills_lists):
-    skills_lists = [x["skills"].split(",") for skills in skills_lists]
+def get_skills(summary):
+    skills_lists = [x["skills"].split(",") for x in summary]
     skills = [s for sublist in skills_lists for s in sublist]
     skills_counts = pd.Series(skills).value_counts().reset_index()
     skills_counts.columns = ["skill", "n_candidates"]
@@ -78,10 +74,10 @@ input_text = st.text_area('Insert job description here')
 if st.button('Generate applicants'):
     # When the button is clicked, call the process_text function with the input text
     applicants = create_applicants(input_text)
-    summary = get_summary(applicants)
+    skills_summary = get_skills_summary(applicants)
+    skills_summary = pd.DataFrame(ast.literal_eval(skills_summary)).sort_values(by="number_of_candidates_with_skill", ascending=False)
 
     # Display the output text on the second screen
     st.write(applicants)
-    st.write(summary)
-    skills_table = get_skills[summary]
-    st.table(skills_table)
+    # skills_table = get_skills(summary)
+    st.dataframe(skills_summary)
