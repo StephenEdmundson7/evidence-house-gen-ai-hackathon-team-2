@@ -51,45 +51,36 @@ def get_experience_summary(text):
     experience_summary = get_completion(third_prompt, temperature=0)
     return experience_summary
 
-def get_skills(summary):
-    skills_lists = [x["skills"].split(",") for x in summary]
-    skills = [s for sublist in skills_lists for s in sublist]
-    skills_counts = pd.Series(skills).value_counts().reset_index()
-    skills_counts.columns = ["skill", "n_candidates"]
-    return skills_counts
-
-
-def get_experience(experience_list):
-    data = pd.Series(experience_list, name="experience")
-    fig = plt.hist(data)
-    plt.title('Applicant experience')
-    plt.xlabel("Years")
-    return fig
-
-# define app
+""" Build the app itself """
 st.title('Recruitment co-pilot')
 
 # Create a text area for the user to paste text
 input_text = st.text_area('Insert job description here')
 
 # Create a button
+# When the button is pressed, run certain actions
 if st.button('Generate applicants'):
-    # When the button is clicked, call the process_text function with the input text
+    
+    # get synthetic applicant data
     applicants = create_applicants(input_text)
+    
+    # get a summary of the applicants skills and plot
     skills_summary = get_skills_summary(applicants)
     skills_summary = pd.DataFrame(ast.literal_eval(skills_summary)).sort_values(by="number_of_candidates_with_skill", ascending=False).reset_index()
     fig = px.bar(skills_summary, x="number_of_candidates_with_skill", y="skill", title="Candidate skills")  
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)
     
-    st.write(applicants)
-    st.dataframe(skills_summary)
-    fig
-    
+    # get a summary of the applicants' level of experiece and create a plot
     experience = get_experience_summary(applicants)
     experience = pd.DataFrame({"number_of_years_experience": ast.literal_eval(experience)}).reset_index()
     experience = experience["number_of_years_experience"].value_counts().reset_index()
     fig2 = px.bar(experience, x="number_of_years_experience", y="count", title="Candidate experience level")
     fig2.update_xaxes(showgrid=False)
     fig2.update_yaxes(showgrid=False)
+        
+    # render the outputs in streamlit
+    st.write(applicants)
+    st.dataframe(skills_summary)
+    fig
     fig2
