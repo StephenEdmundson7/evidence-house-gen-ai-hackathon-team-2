@@ -1,2 +1,3 @@
-﻿# evidence-house-gen-ai-hackathon-team-2
+﻿# Recruitment co-pilot
 
+A tool using LLMs to assist in job description drafting and recruitment.
