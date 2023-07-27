@@ -9,7 +9,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chains import SequentialChain
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv()) # read local .env file
-openai.api_key = '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' #os.environ['OPENAI_API_KEY']
+openai.api_key = # insert key
 openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
 
 # gpt functions
@@ -32,9 +32,6 @@ def create_applicants(text):
     Please do not use names but refer to them as applicant 1,2,..
 
     text:```{text}```
-
-    Format the output as JSON with the following keys:
-    applicant
     """
     applicants_response = get_completion(first_prompt)
     return applicants_response
@@ -46,7 +43,7 @@ def get_summary(text):
 
         text:```{text}```
 
-        Format the output as JSON with the following keys:
+        Format the output as a python dictionary with the following keys:
         skills
         years of experinece
         ranking
@@ -57,6 +54,7 @@ def get_summary(text):
 
 
 def get_skills(skills_lists):
+    skills_lists = [x["skills"].split(",") for skills in skills_lists]
     skills = [s for sublist in skills_lists for s in sublist]
     skills_counts = pd.Series(skills).value_counts().reset_index()
     skills_counts.columns = ["skill", "n_candidates"]
@@ -70,14 +68,6 @@ def get_experience(experience_list):
     plt.xlabel("Years")
     return fig
 
-""" Build app """
-
-def process_text(text):
-    # This function takes in text as an argument and returns some other text
-    # You can modify this function to do whatever you want with the input text
-    return text.upper()
-
-
 # define app
 st.title('Recruitment co-pilot')
 
@@ -89,7 +79,9 @@ if st.button('Generate applicants'):
     # When the button is clicked, call the process_text function with the input text
     applicants = create_applicants(input_text)
     summary = get_summary(applicants)
-    # output_text = process_text(input_text)
 
     # Display the output text on the second screen
+    st.write(applicants)
     st.write(summary)
+    skills_table = get_skills[summary]
+    st.table(skills_table)
