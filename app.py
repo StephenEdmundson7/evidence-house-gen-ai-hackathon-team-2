@@ -9,11 +9,11 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chains import SequentialChain
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv()) # read local .env file
-openai.api_key = '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' #os.environ['OPENAI_API_KEY']
+openai.api_key = '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' #os.environ['OPENAI_API_KEY']
+openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
 
 # gpt functions
 def get_completion(prompt, model="gpt-3.5-turbo"):
-    openai.api_key = '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' #os.environ['OPENAI_API_KEY']
     messages = [{"role": "user", "content": prompt}]
     response = openai.ChatCompletion.create(
         model=model,
@@ -24,7 +24,7 @@ def get_completion(prompt, model="gpt-3.5-turbo"):
 
 
 def create_applicants(text):
-      first_prompt= f"""Give us three examples of applications suitable to the above job description and give specific examples where each applicant has demonstrated Civil service behaviours based on the file here:https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/717275/CS_Behaviours_2018.pdf  \
+    first_prompt= f"""Give us three examples of applications suitable to the above job description and give specific examples where each applicant has demonstrated Civil service behaviours based on the file here:https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/717275/CS_Behaviours_2018.pdf  \
     that could be suitable for the text that is delimited by triple backticks .\
     Include specific examples where candidate has demonstrated the civil service behavior in a previous role , relevent skills , years of experience,
     qualification.
@@ -77,6 +77,8 @@ def process_text(text):
     # You can modify this function to do whatever you want with the input text
     return text.upper()
 
+
+# define app
 st.title('Recruitment co-pilot')
 
 # Create a text area for the user to paste text
