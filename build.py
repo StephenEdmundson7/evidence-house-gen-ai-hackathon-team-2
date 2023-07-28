@@ -20,4 +20,4 @@
 "https://data.cma.gov.uk" + instance[0] + "proxy/" + "8080/"
 
 # %%
-# !streamlit run app.py --server.port 8080
+# !streamlit run front.py --server.port 8080

@@ -15,12 +15,13 @@ from dotenv import load_dotenv, find_dotenv
 from cachetools import cached
 
 _ = load_dotenv(find_dotenv())  # read local .env file
-openai.api_key = "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"
-#openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
+openai.api_key = "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"
+openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
 
 
 # gpt functions
 # @cached(cache={})
+@st.cache_data
 def get_completion(prompt, temperature, model="gpt-3.5-turbo"):
     messages = [{"role": "user", "content": prompt}]
     response = openai.ChatCompletion.create(
@@ -30,7 +31,7 @@ def get_completion(prompt, temperature, model="gpt-3.5-turbo"):
     )
     return response.choices[0].message["content"]
 
-
+@st.cache_data
 def create_applicants(text):
     first_prompt = f"""Give us 10 examples of applications for the job description in {text}. \
         For each applicant write a response in the folowin format:
@@ -46,10 +47,10 @@ def create_applicants(text):
 
         Please do not use names but refer to them as applicant 1,2,..
         """
-    applicants_response = get_completion(first_prompt, temperature=0.9)
+    applicants_response = get_completion(first_prompt, temperature=0.7)
     return applicants_response
 
-
+@st.cache_data
 def get_skills_summary(text):
     second_prompt = f"""For the applicants data in {text} \
         please extract all the relevant technical skills shown by the applicants, how many applicants show each skill and the average proficiency score across all applicants of either 1 (basic), 2 (intermediate) or 3 (advanced). \
@@ -59,20 +60,36 @@ def get_skills_summary(text):
 
     # applicant data:```{text}```
     # """
-    skills_summary = get_completion(second_prompt, temperature=0.2)
+    skills_summary = get_completion(second_prompt, temperature=0.1)
     return skills_summary
 
-
+@st.cache_data
 def get_experience_summary(text):
     third_prompt = f"""For the applicants data in {text} \
         please extract the number of years experience for each applicant as a list of integers i.e. in the json format \
         {{"number_of_years_experience": [integer_years_applicant1, integer_years_applicant2, integer_years_applicant3]}}"""
-    experience_summary = get_completion(third_prompt, temperature=0.2)
+    experience_summary = get_completion(third_prompt, temperature=0.1)
     return experience_summary
 
+def update_job_description(initial_job_desc, new_skills):
+    fourth_prompt = f"""Take th original job description in quotes here '{initial_job_desc}' and add in the following new skills: '{new_skills}'. Output a revised job description. The revised job description should be very similar in format whilst ensuring these new skills are included - in the same part of the description as other skills but without dominating the description. Parts of the original job description that are not related to the new skills should remain untouched.  
+    
+    Use your judgement as to where these skills are located on the advert please.
+    
+    Read through the revised job description and ensure that grammer is correct and make changes accordingly """
+    new_job_desc = get_completion(fourth_prompt, temperature=0.9)
+    return new_job_desc
+
+col1,col2,col3=st.columns([1,3,1])
+with col2:
+    st.image("Logo.png",width=400)
+
+    
+st.write("")
+st.write("")
 
 # build the app itself
-st.title('Recruitment co-pilot')
+#st.title('Recruitment co-pilot')
 
 # Create a text area for the user to paste text
 input_text = st.text_area('Insert job description here')
@@ -80,6 +97,9 @@ input_text = st.text_area('Insert job description here')
 # Create a button
 # When the button is pressed, run certain actions
 if st.button('Generate applicants'):
+    
+
+    
     # get synthetic applicant data
     applicants = create_applicants(input_text)
 
@@ -104,3 +124,19 @@ if st.button('Generate applicants'):
         st.write(applicants)
     fig
     fig2
+    
+st.write("")
+st.markdown("---")
+    #if st.button('Update job description'):
+if input_text!="":
+    new_input_text = st.text_area('Insert new skills / emphasis for job description')
+    
+    # #Reset changes
+    # if st.button('Generate applicants'):
+    #     new_input_text=""
+        
+    if new_input_text!="":
+        new_job_desc = update_job_description(input_text, new_input_text)
+        st.write(new_job_desc)
+        
+        st.write("_Copy this job description and paste in the first box to see what skills the revised advert attracts_")

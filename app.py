@@ -13,8 +13,9 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chains import SequentialChain
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv()) # read local .env file
-openai.api_key = "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"
+openai.api_key = "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"
 openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
+
 
 # gpt functions
 def get_completion(prompt, temperature, model="gpt-3.5-turbo"):
@@ -50,6 +51,10 @@ def get_experience_summary(text):
     third_prompt = f"""For the applicants data in {text} please extract the number of years experience for each applicant as a list of integers i.e. in the format [integer_years_1, integer_years_2, integer_years_3]"""
     experience_summary = get_completion(third_prompt, temperature=0)
     return experience_summary
+
+
+
+
 
 """ Build the app itself """
 st.title('Recruitment co-pilot')
