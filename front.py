@@ -15,7 +15,7 @@ from dotenv import load_dotenv, find_dotenv
 from cachetools import cached
 
 _ = load_dotenv(find_dotenv())  # read local .env file
-openai.api_key = "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"
+openai.api_key = ""
 openai.organisation = "org-AEPp1joUbsaKuRIqN0X9eUaI"
 
 
@@ -55,11 +55,6 @@ def get_skills_summary(text):
     second_prompt = f"""For the applicants data in {text} \
         please extract all the relevant technical skills shown by the applicants, how many applicants show each skill and the average proficiency score across all applicants of either 1 (basic), 2 (intermediate) or 3 (advanced). \
         Please provide the answer in json format e.g. {{"skill": ["skill 1", "skill 2"], "number_of_candidates_with_skill": [1, 3], "average_proficiency_score": [3, 1]}}"""
-    # second_prompt = f"""Imagine you are a recruiter. Return a json file with the following keys for the applicant data in {text}. 1) Key skills: the relevant skills shown by the candidate with an associated proficiency score of either 1 (basic), 2 (intermediate) or 3 (advanced). Each item in the json is a different skill"""
-    # second_prompt= f"""Imagine you are a recruiter. Categorise each candidate with their relevant skills, level of education and years of experience. Rank the applicants and give a one short summary reasoning of the ranking. Format the output as a python dictionary without any line breaks with the following keys: skills (Please list the relevant skills demonstrated by each applicant and give them a proficiency level from 1 (basic), 2 (intermediate) or 3 (advanced)), years of work experience (integer of how many years an applicant has been working for), highest level of education (e.g. Bachelors degree, masters degree or PhD), ranking (reasoning of ranking).
-
-    # applicant data:```{text}```
-    # """
     skills_summary = get_completion(second_prompt, temperature=0.1)
     return skills_summary
 
@@ -96,7 +91,7 @@ input_text = st.text_area('Insert job description here')
 
 # Create a button
 # When the button is pressed, run certain actions
-if st.button('Generate applicants'):
+if st.button('*Generate applicants* 🛩️'):
     
 
     
